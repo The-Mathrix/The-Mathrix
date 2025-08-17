@@ -59,6 +59,7 @@
     padding: 0.6rem;
     cursor: pointer;
     font-size: 0.85rem;
+    transition: background 0.2s, color 0.2s;
   }
   .term-input button:hover {
     background: #ff00ff;
@@ -72,7 +73,7 @@
     <div class="terminal" id="terminal"></div>
     <div class="term-input">
       <input id="termInput" placeholder="Type card number first" autocomplete="off">
-      <button id="okBtn">OK</button>
+      <button id="okBtn" type="button">OK</button>
     </div>
   </main>
 
@@ -145,7 +146,10 @@ function appendLine(text) {
   const div = document.createElement("div");
   div.textContent = text;
   terminal.appendChild(div);
-  terminal.scrollTop = terminal.scrollHeight;
+  // Force scroll to bottom after a new line is appended
+  setTimeout(() => {
+    terminal.scrollTop = terminal.scrollHeight;
+  }, 0);
 }
 
 function printWelcome() {
@@ -198,13 +202,17 @@ function sendCommand() {
   termInput.focus();
 }
 
+// fix: make sure input is focused on load
+window.onload = function() {
+  printWelcome();
+  termInput.focus();
+};
+
 okBtn.addEventListener("click", sendCommand);
 
 termInput.addEventListener("keydown", e => {
   if (e.key === "Enter") sendCommand();
 });
-
-printWelcome();
 </script>
 </body>
 </html>
