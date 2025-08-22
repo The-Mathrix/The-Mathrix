@@ -137,10 +137,7 @@ const correctAnswers = {
 
 let currentCard = null;
 let waitingForAnswer = false;
-
-const terminal = document.getElementById("terminal");
-const termInput = document.getElementById("termInput");
-const okBtn = document.getElementById("okBtn");
+let terminal, termInput, okBtn;
 
 function appendLine(text) {
   const div = document.createElement("div");
@@ -154,61 +151,51 @@ function appendLine(text) {
 function printWelcome() {
   appendLine("Welcome to The Mathrix!");
   appendLine("Step 1: Type the card number to see the question.");
-  appendLine("Step 2: Type the answer.");
-  appendLine("Step 3: If your answer is wrong, you can retry or type a new card number.");
+  appendLine("Step 2: Type the answer exactly (symbols matter: ², ³, ≥, ≤).");
+  appendLine("Step 3: If your answer is wrong, retry or type a new card number.");
 }
 
 function handleCardNumber(input) {
-  // Ensure we only accept integer strings (no decimals, no extra spaces)
   const numStr = input.trim();
   if (!/^\d+$/.test(numStr)) {
     appendLine(`❌ Card ${input} not found.`);
-    currentCard = null;
-    waitingForAnswer = false;
-    termInput.placeholder = "Type card number first";
+    resetState();
     return;
   }
   const num = parseInt(numStr, 10);
-  if (!correctAnswers.hasOwnProperty(num)) {
+  if (!correctAnswers[num]) {
     appendLine(`❌ Card ${input} not found.`);
-    currentCard = null;
-    waitingForAnswer = false;
-    termInput.placeholder = "Type card number first";
+    resetState();
     return;
   }
   currentCard = num;
   waitingForAnswer = true;
   appendLine(`📜 Card ${num}: ${correctAnswers[num].question}`);
-  appendLine("Now type your answer (or type a different card number):");
+  appendLine("Now type your answer (or type another card number):");
   termInput.placeholder = "Type your answer or another card";
 }
 
 function handleAnswer(input) {
-  // Allow player to type another card number instead of answer if desired
-  const trimmedInput = input.trim();
-  if (/^\d+$/.test(trimmedInput) && correctAnswers.hasOwnProperty(parseInt(trimmedInput, 10))) {
-    handleCardNumber(trimmedInput);
+  const trimmed = input.trim();
+  // allow switching card mid-answer
+  if (/^\d+$/.test(trimmed) && correctAnswers[parseInt(trimmed, 10)]) {
+    handleCardNumber(trimmed);
     return;
   }
-  if (currentCard === null || !correctAnswers.hasOwnProperty(currentCard)) {
-    appendLine("❌ Please select a valid card first.");
-    waitingForAnswer = false;
-    currentCard = null;
-    termInput.placeholder = "Type card number first";
+  if (currentCard === null) {
+    appendLine("❌ Please select a card first.");
+    resetState();
     return;
   }
-  const answer = trimmedInput.toLowerCase();
+  const answer = trimmed.toLowerCase();
   const validAnswers = correctAnswers[currentCard].answers.map(a => a.toLowerCase());
   if (validAnswers.includes(answer)) {
     appendLine("✅ Correct!");
-    waitingForAnswer = false;
-    currentCard = null;
+    resetState();
     appendLine("Type another card number to continue.");
-    termInput.placeholder = "Type card number first";
   } else {
     appendLine("❌ Wrong. Try again, or type a different card number.");
-    // Don't reset state, allow retry or a new card number
-    termInput.placeholder = "Type your answer or another card";
+    termInput.placeholder = "Retry answer or type new card";
   }
 }
 
@@ -226,16 +213,25 @@ function sendCommand() {
   termInput.focus();
 }
 
-window.onload = function() {
+function resetState() {
+  currentCard = null;
+  waitingForAnswer = false;
+  termInput.placeholder = "Type card number first";
+}
+
+window.onload = () => {
+  terminal = document.getElementById("terminal");
+  termInput = document.getElementById("termInput");
+  okBtn = document.getElementById("okBtn");
+
   printWelcome();
+
+  okBtn.addEventListener("click", sendCommand);
+  termInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") sendCommand();
+  });
   termInput.focus();
 };
-
-okBtn.addEventListener("click", sendCommand);
-
-termInput.addEventListener("keydown", e => {
-  if (e.key === "Enter") sendCommand();
-});
 </script>
 </body>
 </html>
