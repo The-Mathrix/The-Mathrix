@@ -159,8 +159,17 @@ function printWelcome() {
 }
 
 function handleCardNumber(input) {
-  const num = Number(input);
-  if (!Number.isInteger(num) || !correctAnswers.hasOwnProperty(num)) {
+  // Ensure we only accept integer strings (no decimals, no extra spaces)
+  const numStr = input.trim();
+  if (!/^\d+$/.test(numStr)) {
+    appendLine(`❌ Card ${input} not found.`);
+    currentCard = null;
+    waitingForAnswer = false;
+    termInput.placeholder = "Type card number first";
+    return;
+  }
+  const num = parseInt(numStr, 10);
+  if (!correctAnswers.hasOwnProperty(num)) {
     appendLine(`❌ Card ${input} not found.`);
     currentCard = null;
     waitingForAnswer = false;
@@ -176,13 +185,9 @@ function handleCardNumber(input) {
 
 function handleAnswer(input) {
   // Allow player to type another card number instead of answer if desired
-  const asNum = Number(input);
-  if (
-    Number.isInteger(asNum) &&
-    correctAnswers.hasOwnProperty(asNum) &&
-    String(asNum) === input.trim()
-  ) {
-    handleCardNumber(input);
+  const trimmedInput = input.trim();
+  if (/^\d+$/.test(trimmedInput) && correctAnswers.hasOwnProperty(parseInt(trimmedInput, 10))) {
+    handleCardNumber(trimmedInput);
     return;
   }
   if (currentCard === null || !correctAnswers.hasOwnProperty(currentCard)) {
@@ -192,7 +197,7 @@ function handleAnswer(input) {
     termInput.placeholder = "Type card number first";
     return;
   }
-  const answer = input.trim().toLowerCase();
+  const answer = trimmedInput.toLowerCase();
   const validAnswers = correctAnswers[currentCard].answers.map(a => a.toLowerCase());
   if (validAnswers.includes(answer)) {
     appendLine("✅ Correct!");
