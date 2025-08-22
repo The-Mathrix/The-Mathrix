@@ -146,7 +146,6 @@ function appendLine(text) {
   const div = document.createElement("div");
   div.textContent = text;
   terminal.appendChild(div);
-  // Force scroll to bottom after a new line is appended
   setTimeout(() => {
     terminal.scrollTop = terminal.scrollHeight;
   }, 0);
@@ -156,6 +155,7 @@ function printWelcome() {
   appendLine("Welcome to The Mathrix!");
   appendLine("Step 1: Type the card number to see the question.");
   appendLine("Step 2: Type the answer.");
+  appendLine("Step 3: If your answer is wrong, you can retry or type a new card number.");
 }
 
 function handleCardNumber(input) {
@@ -170,22 +170,30 @@ function handleCardNumber(input) {
   currentCard = num;
   waitingForAnswer = true;
   appendLine(`📜 Card ${num}: ${correctAnswers[num].question}`);
-  appendLine("Now type your answer:");
-  termInput.placeholder = "Type your answer";
+  appendLine("Now type your answer (or type a different card number):");
+  termInput.placeholder = "Type your answer or another card";
 }
 
 function handleAnswer(input) {
+  // Allow player to type another card number instead of answer if desired
+  const asNum = parseInt(input, 10);
+  if (!isNaN(asNum) && correctAnswers.hasOwnProperty(asNum)) {
+    handleCardNumber(input);
+    return;
+  }
   const answer = input.trim().toLowerCase();
   const validAnswers = correctAnswers[currentCard].answers.map(a => a.toLowerCase());
   if (validAnswers.includes(answer)) {
     appendLine("✅ Correct!");
+    waitingForAnswer = false;
+    currentCard = null;
+    appendLine("Type another card number to continue.");
+    termInput.placeholder = "Type card number first";
   } else {
-    appendLine("❌ Wrong.");
+    appendLine("❌ Wrong. Try again, or type a different card number.");
+    // Don't reset state, allow retry or a new card number
+    termInput.placeholder = "Type your answer or another card";
   }
-  waitingForAnswer = false;
-  currentCard = null;
-  appendLine("Type another card number to continue.");
-  termInput.placeholder = "Type card number first";
 }
 
 function sendCommand() {
@@ -202,7 +210,6 @@ function sendCommand() {
   termInput.focus();
 }
 
-// fix: make sure input is focused on load
 window.onload = function() {
   printWelcome();
   termInput.focus();
