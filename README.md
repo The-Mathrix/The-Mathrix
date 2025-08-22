@@ -159,8 +159,8 @@ function printWelcome() {
 }
 
 function handleCardNumber(input) {
-  const num = parseInt(input, 10);
-  if (isNaN(num) || !correctAnswers.hasOwnProperty(num)) {
+  const num = Number(input);
+  if (!Number.isInteger(num) || !correctAnswers.hasOwnProperty(num)) {
     appendLine(`❌ Card ${input} not found.`);
     currentCard = null;
     waitingForAnswer = false;
@@ -176,9 +176,20 @@ function handleCardNumber(input) {
 
 function handleAnswer(input) {
   // Allow player to type another card number instead of answer if desired
-  const asNum = parseInt(input, 10);
-  if (!isNaN(asNum) && correctAnswers.hasOwnProperty(asNum)) {
+  const asNum = Number(input);
+  if (
+    Number.isInteger(asNum) &&
+    correctAnswers.hasOwnProperty(asNum) &&
+    String(asNum) === input.trim()
+  ) {
     handleCardNumber(input);
+    return;
+  }
+  if (currentCard === null || !correctAnswers.hasOwnProperty(currentCard)) {
+    appendLine("❌ Please select a valid card first.");
+    waitingForAnswer = false;
+    currentCard = null;
+    termInput.placeholder = "Type card number first";
     return;
   }
   const answer = input.trim().toLowerCase();
