@@ -142,9 +142,7 @@ function appendLine(text) {
   const div = document.createElement("div");
   div.textContent = text;
   terminal.appendChild(div);
-  setTimeout(() => {
-    terminal.scrollTop = terminal.scrollHeight;
-  }, 0);
+  terminal.scrollTop = terminal.scrollHeight; // always scroll to bottom
 }
 
 function printWelcome() {
@@ -218,7 +216,7 @@ function resetState() {
   termInput.placeholder = "Type card number first";
 }
 
-window.onload = () => {
+window.onload = function() {
   terminal = document.getElementById("terminal");
   termInput = document.getElementById("termInput");
   okBtn = document.getElementById("okBtn");
