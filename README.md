@@ -226,7 +226,7 @@ window.onload = () => {
   printWelcome();
 
   okBtn.addEventListener("click", sendCommand);
-  termInput.addEventListener("keydown", e => {
+  termInput.addEventListener("keydown", function(e) {
     if (e.key === "Enter") sendCommand();
   });
   termInput.focus();
